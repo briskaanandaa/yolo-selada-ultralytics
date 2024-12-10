@@ -19,7 +19,7 @@ def predict():
     image_file = request.files['image']
     
     # Open the image with PIL
-    image = Image.open(image_file.stream)
+    image = Image.open(image_file.stream).convert("RGB")  # Ensure image is in RGB format
     
     # Convert the image to numpy array
     image_np = np.array(image)
@@ -38,15 +38,21 @@ def predict():
         draw = ImageDraw.Draw(image)
         draw.rectangle([x1, y1, x2, y2], outline="red", width=3)
         text = f"{class_name} {conf:.2f}"
-        
-        font = ImageFont.load_default()  # Use default font
-        # Get text bounding box to position the background for the label
+
+        try:
+            font = ImageFont.truetype("arial.ttf", 15)  # Specify a font (can use a default font if unavailable)
+        except IOError:
+            font = ImageFont.load_default()  # Fallback to default font if custom font not found
+
+        # Get text bounding box
         text_bbox = draw.textbbox((x1, y1), text, font=font)
-        
+        text_width = text_bbox[2] - text_bbox[0]
+        text_height = text_bbox[3] - text_bbox[1]
+
         # Draw a background for the text label
-        draw.rectangle([text_bbox[0], text_bbox[1], text_bbox[2], text_bbox[3]], fill="red")
+        draw.rectangle([x1, y1 - text_height, x1 + text_width, y1], fill="red")
         # Draw the text
-        draw.text((x1, y1 - (text_bbox[3] - text_bbox[1])), text, fill="white", font=font)
+        draw.text((x1, y1 - text_height), text, fill="white", font=font)
 
     # Save the image with bounding boxes to a BytesIO object
     img_byte_arr = BytesIO()
