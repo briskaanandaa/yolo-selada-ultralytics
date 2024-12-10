@@ -11,9 +11,9 @@
       <input type="file" name="image" accept="image/*" required />
       <button type="submit">Upload</button>
     </form>
-    {% if image_url %}
+    {% if img_base64 %}
     <h2>Predicted Image</h2>
-    <img src="{{ image_url }}" alt="Predicted Image" />
+    <img src="data:image/png;base64,{{ img_base64 }}" alt="Predicted Image" />
     <h3>Predictions:</h3>
     <ul>
       {% for prediction in predictions %}
